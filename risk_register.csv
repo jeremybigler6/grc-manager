@@ -1,0 +1,3 @@
+Risk ID,Risk Name,Category,Likelihood,Impact,Risk Score,Risk Level,Owner,Treatment Plan,Status
+R-001,Phishing Attack,Cybersecurity,4,5,20,High,IT Security,Impletment MFA and phishing awareness training.,Open
+R-002,Malware,Cybersecurity ,3,3,9,Medium,IT Security,"Deploy endpoint protection, keep systems patched, restrict administrative preivileges, filter email attachments, and maintain tested backups.",Open
