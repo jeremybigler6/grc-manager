@@ -1,6 +1,7 @@
 import csv
 import os
 from datetime import date
+from controls import get_controls_for_risk
 
 
 FILE_NAME = "risk_register.csv"
@@ -23,6 +24,8 @@ HEADERS = [
 
 
 def calculate_risk_level(score):
+    if score >= 20:
+        return "Critical"
     if score >= 15:
         return "High"
     elif score >= 8:
@@ -102,13 +105,57 @@ def add_risk():
 
 
 def view_risks():
-    print("\n--- Risk Register ---")
+    risks = []
 
     with open(FILE_NAME, "r") as file:
         reader = csv.reader(file)
+        next(reader)
 
         for row in reader:
-            print(row)
+            risks.append(row)
+
+    if not risks:
+        print("\nNo risks found.")
+        return
+
+    print("\n========== View Risks ==========")
+    print("1. Sort by Risk ID")
+    print("2. Sort by Risk Score")
+    print("3. Sort by Risk Level")
+    print("4. Sort by Due Date")
+    print("5. Sort by Owner")
+    print("6. No Sorting")
+    print("================================")
+
+    choice = input("Choose a sorting option: ").strip()
+
+    if choice == "1":
+        risks = sorted(risks, key=lambda row: row[0])
+    elif choice == "2":
+        risks = sorted(risks, key=lambda row: int(row[5]), reverse=True)
+    elif choice == "3":
+        level_order = {
+            "critical": 4,
+            "high": 3,
+            "medium": 2,
+            "low": 1
+        }
+        risks = sorted(
+            risks,
+            key=lambda row: level_order.get(row[6].strip().lower(), 0),
+            reverse=True
+        )
+    elif choice == "4":
+        risks = sorted(risks, key=lambda row: date.fromisoformat(row[12]))
+    elif choice == "5":
+        risks = sorted(risks, key=lambda row: row[7].strip().lower())
+    elif choice == "6":
+        pass
+    else:
+        print("Invalid sorting option. Showing unsorted risks.")
+
+    display_risks("Risk Register", risks)
+    
 
 def edit_risk(risk_id=None):
     risk_id_was_passed_in = risk_id is not None
@@ -147,7 +194,7 @@ def edit_risk(risk_id=None):
                 print(f"Owner:          {row[7]}")
                 print(f"Treatment Plan: {row[8]}")
                 print(f"Status:         {row[9]}")
-                print(f"Completion Date: {row[10]}")
+                print(f"Completion Date: {row[12]}")
 
                 if not risk_id_was_passed_in:
                     choice = input("\nEdit this risk? (Y/N): ").lower().strip()
@@ -298,6 +345,66 @@ def delete_risk():
         writer = csv.writer(file)
         writer.writerows(risks)
 
+
+def view_risk_details():
+
+    risk_id = input("Enter Risk ID: ").strip().upper()
+
+    with open(FILE_NAME, "r") as file:
+        reader = csv.reader(file)
+        next(reader)
+
+        for row in reader:
+
+            if row[0].strip().upper() == risk_id:
+
+                print("\n========== Risk Details ==========\n")
+
+                print(f"Risk ID:         {row[0]}")
+                print(f"Risk Name:       {row[1]}")
+                print(f"Category:        {row[2]}")
+
+                print()
+
+                print(f"Likelihood:      {row[3]}")
+                print(f"Impact:          {row[4]}")
+                print(f"Risk Score:      {row[5]}")
+                print(f"Risk Level:      {row[6]}")
+
+                print()
+
+                print(f"Owner:           {row[7]}")
+                print(f"Status:          {row[9]}")
+
+                print()
+
+                print(f"Date Created:    {row[10]}")
+                print(f"Last Updated:    {row[11]}")
+                print(f"Completion Date: {row[12]}")
+
+                print()
+
+                print("Treatment Plan")
+                print("-" * 40)
+                print(row[8])
+
+                controls = get_controls_for_risk(risk_id)
+
+                print("Associated Controls")
+                print("-" * 40)
+
+                if not controls:
+                    print("None")
+
+                else:
+                    for control in controls:
+                        print(f"✓ {control[0]} - {control[1]}")
+
+                return
+
+    print("Risk not found.")
+
+
 def search_risks():
     print("\n----------- Search Risks -----------")
     print("1. Search by Risk ID")
@@ -361,7 +468,7 @@ def search_risks():
     if not found:
         print("No matching risks found.")
 
-def risk_dashboard():
+def summary_dashboard():
 
     overdue_risks = []
     upcoming_risks = []
@@ -454,52 +561,233 @@ def risk_dashboard():
         print("\n========== Overdue Risks ==========")
 
     for row in overdue_risks:
-        print(f"{row[0]} - {row[1]}")
-        print(f"Owner: {row[7]}")
-        print(f"Due:   {row[12]}")
+        print(
+            f"{row[0]} - {row[1]} | "
+            f"Score: {row[5]} | "
+            f"Level: {row[6]} | "
+            f"Owner: {row[7]} | "
+            f"Due: {row[12]}"
+        )
         print()
 
     if upcoming_risks:
         print("\n========== Due Soon Risks ==========")
 
         for row in upcoming_risks:
-            print(f"{row[0]} - {row[1]}")
-            print(f"Owner: {row[7]}")
-            print(f"Due:   {row[12]}")
+            print(
+                f"{row[0]} - {row[1]} | "
+                f"Score: {row[5]} | "
+                f"Level: {row[6]} | "
+                f"Owner: {row[7]} | "
+                f"Due: {row[12]}"
+            )
             print()
 
-def main():
-    create_file_if_missing()
 
+def risk_dashboard():
     while True:
-        print("\n=== Python GRC Risk Register ===")
-        print("1. Add Risk")
-        print("2. View Risks")
-        print("3. Edit Risk")
-        print("4. Delete Risk")
-        print("5. Search Risks")
-        print("6. Risk Dashboard")
-        print("7. Exit")
+        print("\n========== Dashboard Menu ==========")
+        print("1. Summary Dashboard")
+        print("2. View Overdue Risks")
+        print("3. View Due Soon Risks")
+        print("4. View Critical Risks")
+        print("5. View Risk Heat Map")
+        print("6. Return to Main Menu")
+        print("====================================")
 
-        choice = input("Choose an option: ")
+        choice = input("Choose an option: ").strip()
 
         if choice == "1":
-            add_risk()
+            summary_dashboard()
         elif choice == "2":
-            view_risks()
+            view_overdue_risks()
         elif choice == "3":
-            edit_risk()
+            view_upcoming_risks()
         elif choice == "4":
-            delete_risk()
+            view_critical_risks()
         elif choice == "5":
-            search_risks()
+            risk_heat_map()
         elif choice == "6":
-            risk_dashboard()
-        elif choice == "7":
-            print("Goodbye.")
             break
         else:
             print("Invalid choice. Try again.")
 
 
-main()
+def risk_heat_map():
+    heat_map = {
+        (1, 1): 0, (1, 2): 0, (1, 3): 0, (1, 4): 0, (1, 5): 0,
+        (2, 1): 0, (2, 2): 0, (2, 3): 0, (2, 4): 0, (2, 5): 0,
+        (3, 1): 0, (3, 2): 0, (3, 3): 0, (3, 4): 0, (3, 5): 0,
+        (4, 1): 0, (4, 2): 0, (4, 3): 0, (4, 4): 0, (4, 5): 0,
+        (5, 1): 0, (5, 2): 0, (5, 3): 0, (5, 4): 0, (5, 5): 0,
+    }
+
+    with open(FILE_NAME, "r") as file:
+        reader = csv.reader(file)
+        next(reader)
+
+        for row in reader:
+            likelihood = int(row[3])
+            impact = int(row[4])
+
+            heat_map[(impact, likelihood)] += 1
+
+    print("\n========== Risk Heat Map ==========")
+    print("Impact")
+    print()
+    print("        Likelihood")
+    print("        1   2   3   4   5")
+    print("      ---------------------")
+
+    for impact in range(5, 0, -1):
+        print(f"{impact}  |", end="  ")
+
+        for likelihood in range(1, 6):
+            count = heat_map[(impact, likelihood)]
+
+            if count == 0:
+                print(".", end="   ")
+            else:
+                print(count, end="   ")
+
+        print()
+
+    print()
+    print("Each number shows how many risks are in that impact/likelihood box.")
+    print("===================================")
+    
+
+def display_risks(title, risks):
+    print(f"\n========== {title} ==========")
+
+    if not risks:
+        print("No matching risks found.")
+        return
+
+    for row in risks:
+        print(
+            f"{row[0]} - {row[1]} | "
+            f"Score: {row[5]} | "
+            f"Level: {row[6]} | "
+            f"Owner: {row[7]} | "
+            f"Due: {row[12]}"
+        )
+
+        controls = get_controls_for_risk(row[0])
+
+        print("Associated Controls")
+
+        if not controls:
+            print("   None")
+
+        else:
+            for control in controls:
+                print(f"   ✓ {control[0]} - {control[1]}")
+
+        print()
+
+
+def view_upcoming_risks():
+    upcoming_risks = []
+    today = date.today()
+
+    with open(FILE_NAME, "r") as file:
+        reader = csv.reader(file)
+        next(reader)
+
+        for row in reader:
+            status = row[9].strip().lower()
+            target_date = date.fromisoformat(row[12])
+
+            if status != "closed":
+                days_until_due = (target_date - today).days
+
+                if 0 <= days_until_due <= 7:
+                    upcoming_risks.append(row)
+
+    display_risks("Due Soon Risks", upcoming_risks)
+
+
+
+def view_overdue_risks():
+    overdue_risks = []
+    today = date.today()
+
+    with open(FILE_NAME, "r") as file:
+        reader = csv.reader(file)
+        next(reader)
+
+        for row in reader:
+            status = row[9].strip().lower()
+            target_date = date.fromisoformat(row[12])
+
+            if status != "closed" and target_date < today:
+                overdue_risks.append(row)
+
+    display_risks("Overdue Risks", overdue_risks)
+
+
+def view_critical_risks():
+    critical_risks = []
+
+    with open(FILE_NAME, "r") as file:
+        reader = csv.reader(file)
+        next(reader)
+
+        for row in reader:
+            if row[6].strip().lower() == "critical":
+                critical_risks.append(row)
+
+    display_risks("Critical Risks", critical_risks)
+
+
+    
+def risk_register_menu():
+    while True:
+        print("\n=================================")
+        print("      RISK MANAGEMENT")
+        print("=================================")
+
+        print("\nView")
+        print("----")
+        print("1. All Risks")
+        print("2. Risk Profile")
+        print("3. Search Risks")
+
+        print("\nManage")
+        print("------")
+        print("4. Add Risk")
+        print("5. Edit Risk")
+        print("6. Delete Risk")
+
+        print("\nAnalysis")
+        print("--------")
+        print("7. Risk Dashboard")
+
+        print("\n0. Return")
+
+        choice = input("Choose an option: ").strip()
+
+        if choice == "1":
+            view_risks()
+
+        elif choice == "2":
+            view_risk_details()
+
+        elif choice == "3":
+            search_risks()
+
+        elif choice == "4":
+            add_risk()
+
+        elif choice == "5":
+            edit_risk()
+
+        elif choice == "6":
+            delete_risk()
+
+        elif choice == "7":
+            risk_dashboard()
+
+        elif choice == "0":
+            break

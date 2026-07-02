@@ -1,16 +1,21 @@
-Risk ID,Risk Name,Category,Likelihood,Impact,Risk Score,RiskLevel,Owner,TreatmentPlan,Status,DateCreated,LastUpdated,TargetResolutionDate
-R-001,Phishing Attack,Cybersecurity,4,5,20,High,IT Security,Implement MFA and conduct phishing awareness training.,Closed,2026-06-01,2026-06-18,2026-06-15
-R-002,Unauthorized Access,Access Control,4,4,16,High,Security Team,"Enforce MFA, perform quarterly access reviews, and remove inactive accounts.",Open,2026-06-03,2026-06-20,2026-06-20
-R-003,Ransomware Infection,Cybersecurity,3,5,15,High,Cybersecurity Team,"Deploy endpoint detection and response, maintain offline backups, and conduct incident response exercises.",Open,2026-06-05,2026-06-22,2026-07-30
-R-004,Third-Party Vendor Breach,Third-Party Risk,3,5,15,High,Vendor Risk Management,"Perform annual security assessments and review SOC 2 reports.",Open,2026-06-07,2026-06-24,2026-08-15
-R-005,Privilege Escalation,Identity Management,3,4,12,Medium,Identity & Access Management,"Review privileged accounts quarterly and enforce least privilege.",Mitigated,2026-06-08,2026-06-28,2026-07-10
-R-006,CEMS Data Loss,Environmental Compliance,3,5,15,High,HES Department,"Implement redundant data storage and validate emissions data daily.",Open,2026-06-04,2026-06-21,2026-06-25
-R-007,Permit Compliance Violation,Regulatory Compliance,2,5,10,Medium,HES Department,"Conduct monthly permit reviews and maintain audit-ready documentation.",Mitigated,2026-06-06,2026-06-25,2026-07-20
-R-008,Boiler Tube Leak,Operations,3,5,15,High,Utilities Operations,"Perform ultrasonic thickness inspections during scheduled outages and monitor boiler trends.",Open,2026-06-10,2026-06-27,2026-08-01
-R-009,Steam Turbine Failure,Operations,2,5,10,Medium,Utilities Operations,"Use predictive maintenance and vibration monitoring.",Open,2026-06-11,2026-06-27,2026-07-18
-R-010,Cooling Water Pump Failure,Mechanical Reliability,3,4,12,Medium,Maintenance,"Monitor vibration and maintain spare equipment.",Open,2026-06-12,2026-06-29,2026-06-28
-R-011,Chemical Spill During Transfer,Environmental Safety,2,4,8,Medium,Operations Supervisor,"Inspect transfer equipment and conduct spill response drills.",Open,2026-06-13,2026-06-29,2026-08-05
-R-012,Confined Space Entry Incident,Health & Safety,2,5,10,Medium,Safety Coordinator,"Require permits, atmospheric testing, and continuous attendant monitoring.",Mitigated,2026-06-14,2026-06-29,2026-08-10
-R-013,SCADA Server Hardware Failure,Industrial Control Systems,3,4,12,Medium,Control Systems Team,"Maintain redundant servers and test failover procedures.",Open,2026-06-15,2026-06-29,2026-07-02
-R-014,Electrical Arc Flash Hazard,Electrical Safety,2,5,10,Medium,Electrical Maintenance,"Follow LOTO procedures and complete annual arc flash assessments.",Open,2026-06-16,2026-06-29,2026-09-01
-R-015,NPDES Sampling Failure,Environmental Compliance,2,4,8,Medium,Environmental Compliance Team,"Verify sampling schedules and calibrate monitoring equipment.",Open,2026-06-17,2026-06-29,2026-07-05
+Risk ID,Risk Name,Category,Likelihood,Impact,Risk Score,Risk Level,Owner,Treatment Plan,Status,Date Created,Last Updated,Completion Date
+R-001,Incomplete Access Reviews for Operational Systems,Access Control,3,4,12,Medium,Operations,"Perform quarterly access reviews for operational and SCADA accounts.",Open,2026-06-01,2026-06-01,2026-07-15
+R-002,Unpatched Critical Control System Servers,Cybersecurity,4,5,20,Critical,IT Operations,"Implement vulnerability scanning and monthly patch management.",Open,2026-06-02,2026-06-02,2026-06-28
+R-003,Environmental Permit Non-Compliance (Title V/EPA),Environmental Compliance,3,5,15,High,HES,"Review permit requirements and perform monthly compliance audits.",Open,2026-06-03,2026-06-03,2026-07-10
+R-004,Unauthorized Privileged Access to SCADA Systems,Operational Technology,4,5,20,Critical,Operations,"Implement privileged access controls and multi-factor authentication.",Open,2026-06-04,2026-06-04,2026-07-20
+R-005,Failure of Backup Power Distribution Equipment,Infrastructure,4,4,16,High,Infrastructure Team,"Perform preventive maintenance and equipment testing.",Open,2026-06-05,2026-06-05,2026-06-25
+R-006,Delayed Incident Response During Plant Outage,Incident Response,3,5,15,High,Operations,"Conduct incident response exercises and update response procedures.",Open,2026-06-06,2026-06-06,2026-07-05
+R-007,Electrical Distribution Equipment Failure,Operational Reliability,3,5,15,High,Maintenance,"Increase preventive maintenance and equipment inspections.",Open,2026-06-07,2026-06-07,2026-07-30
+R-008,Continuous Emissions Monitoring System (CEMS) Failure,Environmental Compliance,4,4,16,High,HES,"Improve preventive maintenance and redundant monitoring.",Open,2026-06-08,2026-06-08,2026-07-08
+R-009,Water Discharge Permit (NPDES) Reporting Errors,Environmental Compliance,2,4,8,Medium,Compliance Team,"Improve reporting procedures and management review.",Closed,2026-06-09,2026-06-09,2026-06-20
+R-010,Turbine Control System Configuration Drift,Operational Technology,3,5,15,High,Engineering,"Implement formal change management and configuration monitoring.",Open,2026-06-10,2026-06-10,2026-07-10
+R-011,Ransomware Attack,Cybersecurity,5,5,25,Critical,IT Security,"Deploy layered ransomware protection and recovery procedures.",Open,2026-06-11,2026-06-11,2026-06-20
+R-012,Customer Data Breach,Information Security,4,5,20,Critical,Security Team,"Encrypt sensitive data and continuously monitor privileged access.",Open,2026-06-12,2026-06-12,2026-06-25
+R-013,Third-Party Vendor Security Failure,Third Party Risk,3,5,15,High,Vendor Management,"Perform vendor assessments and continuous monitoring.",Open,2026-06-13,2026-06-13,2026-07-15
+R-014,Cloud Security Misconfiguration,Cloud Security,4,4,16,High,Cloud Operations,"Review cloud configurations against security baselines.",Open,2026-06-14,2026-06-14,2026-07-18
+R-015,Missing Multi-Factor Authentication,Identity & Access Management,4,5,20,Critical,IT Security,"Require MFA for all privileged and remote access.",Open,2026-06-15,2026-06-15,2026-07-05
+R-016,Insider Threat,Information Security,3,5,15,High,Security Team,"Monitor privileged user activity and implement least privilege.",Open,2026-06-16,2026-06-16,2026-07-22
+R-017,Phishing Campaign,Cybersecurity,4,4,16,High,SOC Team,"Deploy email filtering and security awareness training.",Open,2026-06-17,2026-06-17,2026-07-01
+R-018,Identity and Access Management Weakness,Access Control,4,4,16,High,Identity Management,"Review user provisioning and privileged access processes.",Open,2026-06-18,2026-06-18,2026-07-12
+R-019,Incomplete Vulnerability Management,Cybersecurity,4,5,20,Critical,IT Operations,"Perform routine vulnerability scanning and remediation.",Open,2026-06-19,2026-06-19,2026-07-08
+R-020,Security Awareness Training Non-Compliance,Compliance,3,4,12,Medium,HR,"Assign mandatory annual security awareness training and monitor completion.",Open,2026-06-20,2026-06-20,2026-07-30
