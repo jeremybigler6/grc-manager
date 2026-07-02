@@ -1,3 +1,4 @@
+from database import connect_db
 import csv
 import os
 
@@ -69,9 +70,16 @@ def add_control():
         description
     ]
 
-    with open(CONTROL_FILE_NAME, "a", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerow(control)
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        INSERT INTO controls
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, control)
+
+    conn.commit()
+    conn.close()
 
     print("Control added successfully.")
 
@@ -80,12 +88,13 @@ def view_controls():
 
     controls = []
 
-    with open(CONTROL_FILE_NAME, "r") as file:
-        reader = csv.reader(file)
-        next(reader)
+    conn = connect_db()
+    cursor = conn.cursor()
 
-        for row in reader:
-            controls.append(row)
+    cursor.execute("SELECT * FROM controls")
+    controls = cursor.fetchall()
+
+    conn.close()
 
     print("\n========== Controls Library ==========")
 

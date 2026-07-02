@@ -1,26 +1,10 @@
-from risk_register import (
-    risk_register_menu,
-    create_file_if_missing,
-    add_risk,
-    view_risks,
-    edit_risk,
-    delete_risk,
-    search_risks,
-    risk_dashboard
-)
-
-
-from controls import (
-    create_control_file_if_missing,
-    controls_menu,
-    create_mapping_file_if_missing
-)
+from database import create_tables
+from risk_register import risk_register_menu
+from controls import controls_menu
 
 
 def main():
-    create_file_if_missing()
-    create_control_file_if_missing()
-    create_mapping_file_if_missing()
+    create_tables()
 
     while True:
         print("\n=================================")

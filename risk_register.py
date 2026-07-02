@@ -2,6 +2,7 @@ import csv
 import os
 from datetime import date
 from controls import get_controls_for_risk
+from database import connect_db
 
 
 FILE_NAME = "risk_register.csv"
@@ -97,376 +98,227 @@ def add_risk():
         target_completion_date
     ]
 
-    with open(FILE_NAME, "a", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerow(risk)
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        INSERT INTO risks
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, risk)
+
+    conn.commit()
+    conn.close()
 
     print(f"\nRisk added successfully. Risk Level: {risk_level}")
 
 
 def view_risks():
-    risks = []
+    conn = connect_db()
+    cursor = conn.cursor()
 
-    with open(FILE_NAME, "r") as file:
-        reader = csv.reader(file)
-        next(reader)
+    cursor.execute("SELECT * FROM risks")
 
-        for row in reader:
-            risks.append(row)
+    risks = cursor.fetchall()
+
+    conn.close()
 
     if not risks:
         print("\nNo risks found.")
         return
 
-    print("\n========== View Risks ==========")
-    print("1. Sort by Risk ID")
-    print("2. Sort by Risk Score")
-    print("3. Sort by Risk Level")
-    print("4. Sort by Due Date")
-    print("5. Sort by Owner")
-    print("6. No Sorting")
-    print("================================")
-
-    choice = input("Choose a sorting option: ").strip()
-
-    if choice == "1":
-        risks = sorted(risks, key=lambda row: row[0])
-    elif choice == "2":
-        risks = sorted(risks, key=lambda row: int(row[5]), reverse=True)
-    elif choice == "3":
-        level_order = {
-            "critical": 4,
-            "high": 3,
-            "medium": 2,
-            "low": 1
-        }
-        risks = sorted(
-            risks,
-            key=lambda row: level_order.get(row[6].strip().lower(), 0),
-            reverse=True
-        )
-    elif choice == "4":
-        risks = sorted(risks, key=lambda row: date.fromisoformat(row[12]))
-    elif choice == "5":
-        risks = sorted(risks, key=lambda row: row[7].strip().lower())
-    elif choice == "6":
-        pass
-    else:
-        print("Invalid sorting option. Showing unsorted risks.")
-
     display_risks("Risk Register", risks)
     
 
-def edit_risk(risk_id=None):
-    risk_id_was_passed_in = risk_id is not None
+def edit_risk():
+    risk_id = input("\nEnter Risk ID to edit: ").strip()
 
-    if risk_id is None:
-        print("\n----------- View / Edit Risk -----------")
-        print("Type 'q' at any prompt to cancel editing.")
-        print("----------------------------------------\n")
-        risk_id = input("Enter the Risk ID to view/edit: ").strip().upper()
-    else:
-        risk_id = risk_id.strip().upper()
+    conn = connect_db()
+    cursor = conn.cursor()
 
-    if risk_id.lower() == "q":
-        print("Edit cancelled.")
+    cursor.execute("""
+        SELECT *
+        FROM risks
+        WHERE risk_id = ?
+    """, (risk_id,))
+
+    risk = cursor.fetchone()
+
+    if not risk:
+        print("\nRisk not found.")
+        conn.close()
         return
 
-    risks = []
-    found = False
+    print("\nLeave blank to keep the current value.\n")
 
-    with open(FILE_NAME, "r") as file:
-        reader = csv.reader(file)
+    risk_name = input(f"Risk Name [{risk[1]}]: ") or risk[1]
+    category = input(f"Category [{risk[2]}]: ") or risk[2]
 
-        for row in reader:
-            if row[0].strip().upper() == risk_id:
-                found = True
+    likelihood_input = input(f"Likelihood [{risk[3]}]: ")
+    likelihood = int(likelihood_input) if likelihood_input else risk[3]
 
-                print("\nCurrent Risk Information")
-                print("------------------------")
-                print(f"Risk ID:        {row[0]}")
-                print(f"Risk Name:      {row[1]}")
-                print(f"Category:       {row[2]}")
-                print(f"Likelihood:     {row[3]}")
-                print(f"Impact:         {row[4]}")
-                print(f"Risk Score:     {row[5]}")
-                print(f"Risk Level:     {row[6]}")
-                print(f"Owner:          {row[7]}")
-                print(f"Treatment Plan: {row[8]}")
-                print(f"Status:         {row[9]}")
-                print(f"Completion Date: {row[12]}")
+    impact_input = input(f"Impact [{risk[4]}]: ")
+    impact = int(impact_input) if impact_input else risk[4]
 
-                if not risk_id_was_passed_in:
-                    choice = input("\nEdit this risk? (Y/N): ").lower().strip()
+    risk_score = likelihood * impact
+    risk_level = calculate_risk_level(risk_score)
 
-                    if choice != "y":
-                        print("No changes made.")
-                        return
+    owner = input(f"Owner [{risk[7]}]: ") or risk[7]
+    treatment_plan = input(f"Treatment Plan [{risk[8]}]: ") or risk[8]
+    status = input(f"Status [{risk[9]}]: ") or risk[9]
+    target_date = input(f"Target Date [{risk[12]}]: ") or risk[12]
 
-                print("\nWhat would you like to edit?")
-                print("1. Risk Name")
-                print("2. Category")
-                print("3. Likelihood")
-                print("4. Impact")
-                print("5. Risk Owner")
-                print("6. Treatment Plan")
-                print("7. Status")
-                print("8. Cancel")
+    today = date.today().isoformat()
 
-                edit_choice = input("Choose an option: ").strip()
+    cursor.execute("""
+        UPDATE risks
+        SET risk_name = ?,
+            category = ?,
+            likelihood = ?,
+            impact = ?,
+            risk_score = ?,
+            risk_level = ?,
+            owner = ?,
+            treatment_plan = ?,
+            status = ?,
+            last_review_date = ?,
+            target_date = ?
+        WHERE risk_id = ?
+    """, (
+        risk_name,
+        category,
+        likelihood,
+        impact,
+        risk_score,
+        risk_level,
+        owner,
+        treatment_plan,
+        status,
+        today,
+        target_date,
+        risk_id
+    ))
 
-                if edit_choice == "1":
-                    new_value = input(f"New Risk Name ({row[1]}): ")
-                    if new_value.lower() == "q":
-                        print("Edit cancelled.")
-                        return
-                    row[1] = new_value or row[1]
+    conn.commit()
+    conn.close()
 
-                elif edit_choice == "2":
-                    new_value = input(f"New Category ({row[2]}): ")
-                    if new_value.lower() == "q":
-                        print("Edit cancelled.")
-                        return
-                    row[2] = new_value or row[2]
+    print("\nRisk updated successfully.")
 
-                elif edit_choice == "3":
-                    new_value = input(f"New Likelihood ({row[3]}): ")
-                    if new_value.lower() == "q":
-                        print("Edit cancelled.")
-                        return
-                    if new_value:
-                        row[3] = int(new_value)
-                        row[5] = int(row[3]) * int(row[4])
-                        row[6] = calculate_risk_level(row[5])
-
-                elif edit_choice == "4":
-                    new_value = input(f"New Impact ({row[4]}): ")
-                    if new_value.lower() == "q":
-                        print("Edit cancelled.")
-                        return
-                    if new_value:
-                        row[4] = int(new_value)
-                        row[5] = int(row[3]) * int(row[4])
-                        row[6] = calculate_risk_level(row[5])
-
-                elif edit_choice == "5":
-                    new_value = input(f"New Risk Owner ({row[7]}): ")
-                    if new_value.lower() == "q":
-                        print("Edit cancelled.")
-                        return
-                    row[7] = new_value or row[7]
-
-                elif edit_choice == "6":
-                    new_value = input(f"New Treatment Plan ({row[8]}): ")
-                    if new_value.lower() == "q":
-                        print("Edit cancelled.")
-                        return
-                    row[8] = new_value or row[8]
-
-                elif edit_choice == "7":
-                    new_value = input(f"New Status ({row[9]}): ")
-                    if new_value.lower() == "q":
-                        print("Edit cancelled.")
-                        return
-                    row[9] = new_value or row[9]
-
-                elif edit_choice == "8":
-                    print("Edit cancelled.")
-                    return
-
-                else:
-                    print("Invalid edit option.")
-                    return
-
-            risks.append(row)
-
-    if not found:
-        print("Risk ID not found.")
-        return
-
-    with open(FILE_NAME, "w", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerows(risks)
-
-    print("Risk updated successfully.")
 
 def delete_risk():
-    print("\n----------- Delete Risk -----------")
-    print("Type 'q' to cancel.")
-    print("-----------------------------------\n")
+    risk_id = input("\nEnter Risk ID to delete: ").strip()
 
-    risk_id = input("Enter the Risk ID to delete: ").strip().upper()
+    conn = connect_db()
+    cursor = conn.cursor()
 
-    if risk_id.lower() == "q":
-        print("Delete cancelled.")
-        return
+    cursor.execute("""
+        DELETE FROM risks
+        WHERE risk_id = ?
+    """, (risk_id,))
 
-    risks = []
-    found = False
-    deleted_risk = None
+    conn.commit()
+    conn.close()
 
-    with open(FILE_NAME, "r") as file:
-        reader = csv.reader(file)
-
-        for row in reader:
-            if row[0].strip().upper() == risk_id:
-                found = True
-                deleted_risk = row
-
-                print("\nRisk Found")
-                print("----------")
-                print(f"Risk ID:        {row[0]}")
-                print(f"Risk Name:      {row[1]}")
-                print(f"Category:       {row[2]}")
-                print(f"Likelihood:     {row[3]}")
-                print(f"Impact:         {row[4]}")
-                print(f"Risk Score:     {row[5]}")
-                print(f"Risk Level:     {row[6]}")
-                print(f"Owner:          {row[7]}")
-                print(f"Treatment Plan: {row[8]}")
-                print(f"Status:         {row[9]}")
-
-                confirm = input("\nAre you sure you want to delete this risk? (Y/N): ").strip().lower()
-
-                if confirm == "y":
-                    print("Risk deleted.")
-                    continue
-                else:
-                    print("Delete cancelled.")
-                    risks.append(row)
-            else:
-                risks.append(row)
-
-    if not found:
-        print("Risk ID not found.")
-        return
-
-    with open(FILE_NAME, "w", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerows(risks)
+    print(f"\nRisk {risk_id} deleted successfully.")
 
 
 def view_risk_details():
 
     risk_id = input("Enter Risk ID: ").strip().upper()
 
-    with open(FILE_NAME, "r") as file:
-        reader = csv.reader(file)
-        next(reader)
+    conn = connect_db()
+    cursor = conn.cursor()
 
-        for row in reader:
+    cursor.execute("""
+        SELECT *
+        FROM risks
+        WHERE risk_id = ?
+    """, (risk_id,))
 
-            if row[0].strip().upper() == risk_id:
+    risk = cursor.fetchone()
 
-                print("\n========== Risk Details ==========\n")
+    if not risk:
+        print("Risk not found.")
+        conn.close()
+        return
 
-                print(f"Risk ID:         {row[0]}")
-                print(f"Risk Name:       {row[1]}")
-                print(f"Category:        {row[2]}")
+    print("\n========== Risk Details ==========\n")
 
-                print()
+    print(f"Risk ID:         {risk[0]}")
+    print(f"Risk Name:       {risk[1]}")
+    print(f"Category:        {risk[2]}")
 
-                print(f"Likelihood:      {row[3]}")
-                print(f"Impact:          {row[4]}")
-                print(f"Risk Score:      {row[5]}")
-                print(f"Risk Level:      {row[6]}")
+    print()
 
-                print()
+    print(f"Likelihood:      {risk[3]}")
+    print(f"Impact:          {risk[4]}")
+    print(f"Risk Score:      {risk[5]}")
+    print(f"Risk Level:      {risk[6]}")
 
-                print(f"Owner:           {row[7]}")
-                print(f"Status:          {row[9]}")
+    print()
 
-                print()
+    print(f"Owner:           {risk[7]}")
+    print(f"Status:          {risk[9]}")
 
-                print(f"Date Created:    {row[10]}")
-                print(f"Last Updated:    {row[11]}")
-                print(f"Completion Date: {row[12]}")
+    print()
 
-                print()
+    print(f"Date Created:    {risk[10]}")
+    print(f"Last Updated:    {risk[11]}")
+    print(f"Completion Date: {risk[12]}")
 
-                print("Treatment Plan")
-                print("-" * 40)
-                print(row[8])
+    print()
 
-                controls = get_controls_for_risk(risk_id)
+    print("Treatment Plan")
+    print("-" * 40)
+    print(risk[8])
 
-                print("Associated Controls")
-                print("-" * 40)
+    controls = get_controls_for_risk(risk_id)
 
-                if not controls:
-                    print("None")
+    print("Associated Controls")
+    print("-" * 40)
 
-                else:
-                    for control in controls:
-                        print(f"✓ {control[0]} - {control[1]}")
+    if not controls:
+        print("None")
 
-                return
+    else:
+        for control in controls:
+            print(f"✓ {control[0]} - {control[1]}")
+
+    return
 
     print("Risk not found.")
 
 
 def search_risks():
-    print("\n----------- Search Risks -----------")
-    print("1. Search by Risk ID")
-    print("2. Search by Risk Name")
-    print("3. Search by Category")
-    print("4. Search by Owner")
-    print("5. Search by Status")
-    print("------------------------------------")
+    search_term = input("\nEnter search term: ").strip().lower()
 
-    choice = input("Choose a search option: ")
+    conn = connect_db()
+    cursor = conn.cursor()
 
-    if choice == "1":
-        column = 0
-        search_label = "Risk ID"
-    elif choice == "2":
-        column = 1
-        search_label = "Risk Name"
-    elif choice == "3":
-        column = 2
-        search_label = "Category"
-    elif choice == "4":
-        column = 7
-        search_label = "Owner"
-    elif choice == "5":
-        column = 9
-        search_label = "Status"
-    else:
-        print("Invalid search option.")
+    cursor.execute("""
+        SELECT *
+        FROM risks
+        WHERE lower(risk_id) LIKE ?
+           OR lower(risk_name) LIKE ?
+           OR lower(category) LIKE ?
+           OR lower(owner) LIKE ?
+           OR lower(status) LIKE ?
+    """, (
+        f"%{search_term}%",
+        f"%{search_term}%",
+        f"%{search_term}%",
+        f"%{search_term}%",
+        f"%{search_term}%"
+    ))
+
+    risks = cursor.fetchall()
+    conn.close()
+
+    if not risks:
+        print("\nNo matching risks found.")
         return
 
-    search_term = input(f"Enter {search_label} to search for: ").strip().lower()
+    display_risks("Search Results", risks)
 
-    found = False
-
-    with open(FILE_NAME, "r") as file:
-        reader = csv.reader(file)
-        next(reader)
-
-        for row in reader:
-            if search_term in row[column].lower():
-                found = True
-                print("\nRisk Found")
-                print("----------")
-                print(f"Risk ID:        {row[0]}")
-                print(f"Risk Name:      {row[1]}")
-                print(f"Category:       {row[2]}")
-                print(f"Likelihood:     {row[3]}")
-                print(f"Impact:         {row[4]}")
-                print(f"Risk Score:     {row[5]}")
-                print(f"Risk Level:     {row[6]}")
-                print(f"Owner:          {row[7]}")
-                print(f"Treatment Plan: {row[8]}")
-                print(f"Status:         {row[9]}")
-    
-                action = input("\nWould you like to edit this risk? (Y/N): ").strip().lower()
-
-                if action == "y":
-                    edit_risk(row[0])
-                    return
-
-    if not found:
-        print("No matching risks found.")
 
 def summary_dashboard():
 
@@ -487,12 +339,16 @@ def summary_dashboard():
     total_score = 0
     highest_score = 0
 
+    conn = connect_db()
+    cursor = conn.cursor()
 
-    with open(FILE_NAME, "r") as file:
-        reader = csv.reader(file)
-        next(reader)
+    cursor.execute("SELECT * FROM risks")
+    risks = cursor.fetchall()
 
-        for row in reader:
+    conn.close()
+
+    for row in risks:
+
             total_risks += 1
 
             score = int(row[5])
