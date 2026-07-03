@@ -1,27 +1,6 @@
-import csv
-import os
 from datetime import date
 from controls import get_controls_for_risk
 from database import connect_db
-
-
-FILE_NAME = "risk_register.csv"
-
-HEADERS = [
-    "Risk ID",
-    "Risk Name",
-    "Category",
-    "Likelihood",
-    "Impact",
-    "Risk Score",
-    "Risk Level",
-    "Owner",
-    "Treatment Plan",
-    "Status",
-    "Date Created",
-    "Last Updated",
-    "Completion Date"
-]
 
 
 def calculate_risk_level(score):
@@ -478,15 +457,20 @@ def risk_heat_map():
         (5, 1): 0, (5, 2): 0, (5, 3): 0, (5, 4): 0, (5, 5): 0,
     }
 
-    with open(FILE_NAME, "r") as file:
-        reader = csv.reader(file)
-        next(reader)
+    conn = connect_db()
+    cursor = conn.cursor()
 
-        for row in reader:
-            likelihood = int(row[3])
-            impact = int(row[4])
+    cursor.execute("SELECT * FROM risks")
 
-            heat_map[(impact, likelihood)] += 1
+    risks = cursor.fetchall()
+
+    conn.close()
+
+    for row in risks:
+        likelihood = int(row[3])
+        impact = int(row[4])
+
+        heat_map[(impact, likelihood)] += 1
 
     print("\n========== Risk Heat Map ==========")
     print("Impact")
@@ -544,55 +528,70 @@ def display_risks(title, risks):
 
 
 def view_upcoming_risks():
+
+    today = date.today().isoformat()
+
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT *
+        FROM risks
+        WHERE status != 'Closed'
+    """)
+
+    risks = cursor.fetchall()
+
+    conn.close()
+
     upcoming_risks = []
-    today = date.today()
 
-    with open(FILE_NAME, "r") as file:
-        reader = csv.reader(file)
-        next(reader)
+    for row in risks:
+        target_date = date.fromisoformat(row[12])
+        days_until_due = (target_date - date.today()).days
 
-        for row in reader:
-            status = row[9].strip().lower()
-            target_date = date.fromisoformat(row[12])
-
-            if status != "closed":
-                days_until_due = (target_date - today).days
-
-                if 0 <= days_until_due <= 7:
-                    upcoming_risks.append(row)
+        if 0 <= days_until_due <= 7:
+            upcoming_risks.append(row)
 
     display_risks("Due Soon Risks", upcoming_risks)
 
 
 
 def view_overdue_risks():
-    overdue_risks = []
-    today = date.today()
 
-    with open(FILE_NAME, "r") as file:
-        reader = csv.reader(file)
-        next(reader)
+    today = date.today().isoformat()
 
-        for row in reader:
-            status = row[9].strip().lower()
-            target_date = date.fromisoformat(row[12])
+    conn = connect_db()
+    cursor = conn.cursor()
 
-            if status != "closed" and target_date < today:
-                overdue_risks.append(row)
+    cursor.execute("""
+        SELECT *
+        FROM risks
+        WHERE status != 'Closed'
+        AND completion_date < ?
+    """, (today,))
+
+    overdue_risks = cursor.fetchall()
+
+    conn.close()
 
     display_risks("Overdue Risks", overdue_risks)
 
 
 def view_critical_risks():
-    critical_risks = []
 
-    with open(FILE_NAME, "r") as file:
-        reader = csv.reader(file)
-        next(reader)
+    conn = connect_db()
+    cursor = conn.cursor()
 
-        for row in reader:
-            if row[6].strip().lower() == "critical":
-                critical_risks.append(row)
+    cursor.execute("""
+        SELECT *
+        FROM risks
+        WHERE risk_level = 'Critical'
+    """)
+
+    critical_risks = cursor.fetchall()
+
+    conn.close()
 
     display_risks("Critical Risks", critical_risks)
 

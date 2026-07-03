@@ -1,16 +1,21 @@
 Control ID,Control Name,Control Type,Framework,Owner,Status,Description
-C-001,Multi-Factor Authentication,Preventive,NIST CSF,IT Security,Implemented,Require MFA for all privileged and remote access accounts.
-C-002,Privileged Access Management,Preventive,NIST CSF,IT Security,Implemented,Control and monitor privileged accounts.
-C-003,Vulnerability Management Program,Preventive,NIST CSF,IT Operations,Implemented,Perform regular vulnerability scanning and patch remediation.
-C-004,Security Awareness Training,Administrative,NIST CSF,HR,Implemented,Conduct annual cybersecurity awareness training.
-C-005,Endpoint Detection and Response,Detective,NIST CSF,SOC Team,Implemented,Detect malicious activity on endpoints.
-C-006,Security Information and Event Management (SIEM),Detective,NIST CSF,SOC Team,Implemented,Centralize logging and monitor security events.
-C-007,Vendor Risk Management Program,Administrative,NIST CSF,Vendor Management,Implemented,Assess and monitor third-party vendors.
-C-008,Incident Response Plan,Corrective,NIST CSF,Security Team,Implemented,Document and exercise incident response procedures.
-C-009,Business Continuity & Disaster Recovery,Corrective,NIST CSF,Infrastructure Team,Implemented,Ensure recovery of critical services.
-C-010,Configuration Management,Preventive,CIS Controls,IT Operations,Implemented,Maintain secure system configurations.
-C-011,Environmental Compliance Monitoring,Detective,EPA / Title V,HES,Implemented,Monitor emissions and permit compliance.
-C-012,Preventive Maintenance Program,Preventive,ISO 55001,Maintenance,Implemented,Perform scheduled maintenance on critical assets.
-C-013,SCADA Access Control,Preventive,NIST 800-82,Operations,Implemented,Restrict and monitor access to industrial control systems.
-C-014,Change Management Process,Administrative,ITIL,Operations,Implemented,Review and approve production system changes.
-C-015,Data Encryption,Preventive,ISO 27001,IT Security,Implemented,Encrypt sensitive business data at rest and in transit.
+C-001,Quarterly Access Reviews,Detective,Company Policy,Operations,Implemented,"Review user access for operational systems and SCADA environments on a quarterly basis."
+C-002,Industrial Patch Management Program,Preventive,NIST 800-82,IT Operations,Implemented,"Apply security patches to industrial control systems during approved maintenance windows."
+C-003,Environmental Compliance Monitoring,Detective,EPA / Title V,HES,Implemented,"Continuously monitor emissions and permit compliance requirements."
+C-004,SCADA Multi-Factor Authentication,Preventive,NIST 800-82,Operations,Implemented,"Require multi-factor authentication for remote and privileged SCADA access."
+C-005,Preventive Maintenance Program,Preventive,ISO 55001,Maintenance,Implemented,"Perform scheduled maintenance on critical utility and electrical assets."
+C-006,Emergency Response Procedures,Corrective,Company Policy,Operations,Implemented,"Maintain and periodically exercise utility outage and emergency response procedures."
+C-007,Asset Reliability Program,Preventive,ISO 55001,Engineering,Implemented,"Monitor equipment health and perform predictive maintenance on critical assets."
+C-008,CEMS Preventive Maintenance,Preventive,EPA / Title V,HES,Implemented,"Perform scheduled inspections and calibration of Continuous Emissions Monitoring Systems."
+C-009,NPDES Reporting Review,Detective,NPDES,Compliance Team,Implemented,"Review water discharge reports for completeness and regulatory compliance."
+C-010,Configuration Change Management,Administrative,ITIL,Engineering,Implemented,"Review, approve, and document changes to industrial control system configurations."
+C-011,Multi-Factor Authentication,Preventive,NIST CSF,IT Security,Implemented,"Require MFA for all privileged and remote access accounts."
+C-012,Privileged Access Management,Preventive,NIST CSF,IT Security,Implemented,"Control, approve, and continuously monitor privileged user accounts."
+C-013,Vulnerability Management Program,Preventive,NIST CSF,IT Operations,Implemented,"Perform continuous vulnerability scanning and timely remediation."
+C-014,Cloud Security Baseline Reviews,Detective,CIS Benchmarks,Cloud Operations,Implemented,"Review cloud configurations against approved security baselines."
+C-015,Data Encryption,Preventive,ISO 27001,IT Security,Implemented,"Encrypt sensitive business data at rest and during transmission."
+C-016,Endpoint Detection and Response,Detective,NIST CSF,SOC Team,Implemented,"Detect malicious activity on workstations and servers."
+C-017,Security Awareness Training,Administrative,NIST CSF,HR,Implemented,"Provide recurring security awareness and phishing training."
+C-018,Identity Lifecycle Management,Administrative,ISO 27001,Identity Management,Implemented,"Review user provisioning, role changes, and account termination processes."
+C-019,Security Information and Event Management (SIEM),Detective,NIST CSF,SOC Team,Implemented,"Collect and analyze security logs for suspicious activity."
+C-020,Third-Party Risk Management Program,Administrative,NIST CSF,Vendor Management,Implemented,"Assess and continuously monitor third-party vendors for security risk."

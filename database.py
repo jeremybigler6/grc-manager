@@ -31,7 +31,7 @@ def create_tables():
         )
     """)
 
-    # Controls Table
+    # Control Table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS controls (
             control_id TEXT PRIMARY KEY,
