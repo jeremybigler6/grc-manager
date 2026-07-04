@@ -1,9 +1,30 @@
+import os
+import shutil
 import sqlite3
+from pathlib import Path
 
-DB_NAME = "grc_manager.db"
+BASE_DIR = Path(__file__).resolve().parent
+
+
+def get_data_dir():
+    for candidate in [BASE_DIR / "data", BASE_DIR.parent / "data"]:
+        if candidate.exists():
+            return candidate
+    return BASE_DIR / "data"
+
+
+DATA_DIR = get_data_dir()
+DB_NAME = str(DATA_DIR / "grc_manager.db")
 
 
 def connect_db():
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+    if not os.path.exists(DB_NAME):
+        legacy_db = BASE_DIR / "grc_manager.db"
+        if legacy_db.exists():
+            shutil.copy2(legacy_db, DB_NAME)
+
     conn = sqlite3.connect(DB_NAME)
     return conn
 

@@ -1,6 +1,8 @@
 from datetime import date
 from controls import get_controls_for_risk
 from database import connect_db
+from audit_trail import log_activity
+from ai_tools import ai_tools_menu
 
 
 def calculate_risk_level(score):
@@ -88,6 +90,7 @@ def add_risk():
     conn.commit()
     conn.close()
 
+    log_activity("Risk Created", f"{risk_id} - {risk_name}")
     print(f"\nRisk added successfully. Risk Level: {risk_level}")
 
 
@@ -106,7 +109,41 @@ def view_risks():
         return
 
     display_risks("Risk Register", risks)
-    
+
+
+def view_all_risks_with_controls():
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT risk_id, risk_name, category, status, risk_level
+        FROM risks
+        ORDER BY risk_id
+    """)
+
+    risks = cursor.fetchall()
+    conn.close()
+
+    print("\n========== Risk-Control Coverage Report ==========")
+
+    if not risks:
+        print("No risks found.")
+        return
+
+    for risk in risks:
+        risk_id, risk_name, category, status, risk_level = risk
+        print(f"\n{risk_id} - {risk_name}")
+        print(f"Category: {category} | Status: {status} | Level: {risk_level}")
+
+        controls = get_controls_for_risk(risk_id)
+        if not controls:
+            print("   No controls linked.")
+            continue
+
+        print("   Linked Controls:")
+        for control in controls:
+            print(f"   - {control[0]} | {control[1]}")
+
 
 def edit_risk():
     risk_id = input("\nEnter Risk ID to edit: ").strip()
@@ -180,6 +217,7 @@ def edit_risk():
     conn.commit()
     conn.close()
 
+    log_activity("Risk Updated", f"{risk_id} - {risk_name}")
     print("\nRisk updated successfully.")
 
 
@@ -197,6 +235,7 @@ def delete_risk():
     conn.commit()
     conn.close()
 
+    log_activity("Risk Deleted", risk_id)
     print(f"\nRisk {risk_id} deleted successfully.")
 
 
@@ -221,50 +260,34 @@ def view_risk_details():
         return
 
     print("\n========== Risk Details ==========\n")
-
     print(f"Risk ID:         {risk[0]}")
     print(f"Risk Name:       {risk[1]}")
     print(f"Category:        {risk[2]}")
-
-    print()
-
     print(f"Likelihood:      {risk[3]}")
     print(f"Impact:          {risk[4]}")
     print(f"Risk Score:      {risk[5]}")
     print(f"Risk Level:      {risk[6]}")
-
-    print()
-
     print(f"Owner:           {risk[7]}")
     print(f"Status:          {risk[9]}")
-
-    print()
-
     print(f"Date Created:    {risk[10]}")
     print(f"Last Updated:    {risk[11]}")
-    print(f"Completion Date: {risk[12]}")
+    print(f"Target Date:     {risk[12]}")
 
-    print()
-
-    print("Treatment Plan")
+    print("\nTreatment Plan")
     print("-" * 40)
-    print(risk[8])
+    print(risk[8] if risk[8] else "No treatment plan recorded.")
 
     controls = get_controls_for_risk(risk_id)
 
-    print("Associated Controls")
+    print("\nAssociated Controls")
     print("-" * 40)
-
     if not controls:
-        print("None")
-
+        print("No controls linked.")
     else:
         for control in controls:
             print(f"✓ {control[0]} - {control[1]}")
 
-    return
-
-    print("Risk not found.")
+    conn.close()
 
 
 def search_risks():
@@ -297,6 +320,7 @@ def search_risks():
         return
 
     display_risks("Search Results", risks)
+    print("\nUse the Risk ID from the list to view, edit, or manage the item from the main risk menu.")
 
 
 def summary_dashboard():
@@ -430,7 +454,7 @@ def risk_dashboard():
         print("6. Return to Main Menu")
         print("====================================")
 
-        choice = input("Choose an option: ").strip()
+        choice = input("\nSelect an option: ").strip()
 
         if choice == "1":
             summary_dashboard()
@@ -505,24 +529,21 @@ def display_risks(title, risks):
         return
 
     for row in risks:
+        print(f"{row[0]} - {row[1]}")
         print(
-            f"{row[0]} - {row[1]} | "
-            f"Score: {row[5]} | "
-            f"Level: {row[6]} | "
-            f"Owner: {row[7]} | "
-            f"Due: {row[12]}"
+            f"  Category: {row[2]} | Status: {row[9]} | "
+            f"Level: {row[6]} | Owner: {row[7]}"
         )
+        print(f"  Score: {row[5]} | Due: {row[12]}")
 
         controls = get_controls_for_risk(row[0])
-
-        print("Associated Controls")
-
         if not controls:
-            print("   None")
-
+            print("  Controls: None")
         else:
-            for control in controls:
-                print(f"   ✓ {control[0]} - {control[1]}")
+            control_text = ", ".join(f"{control[0]} ({control[1]})" for control in controls[:3])
+            if len(controls) > 3:
+                control_text += " ..."
+            print(f"  Controls: {control_text}")
 
         print()
 
@@ -599,50 +620,43 @@ def view_critical_risks():
     
 def risk_register_menu():
     while True:
-        print("\n=================================")
-        print("      RISK MANAGEMENT")
-        print("=================================")
-
-        print("\nView")
-        print("----")
-        print("1. All Risks")
-        print("2. Risk Profile")
+        print("\n========== Risk Management ==========")
+        print("1. Dashboard")
+        print("2. View Risks")
         print("3. Search Risks")
+        print("4. View Risk Details")
+        print("5. Add Risk")
+        print("6. Edit Risk")
+        print("7. Delete Risk")
+        print("8. Risk-Control Coverage Report")
+        print("9. Return to Main Menu")
+        print("====================================")
 
-        print("\nManage")
-        print("------")
-        print("4. Add Risk")
-        print("5. Edit Risk")
-        print("6. Delete Risk")
-
-        print("\nAnalysis")
-        print("--------")
-        print("7. Risk Dashboard")
-
-        print("\n0. Return")
-
-        choice = input("Choose an option: ").strip()
+        choice = input("\nSelect an option: ").strip()
 
         if choice == "1":
-            view_risks()
+            risk_dashboard()
 
         elif choice == "2":
-            view_risk_details()
+            view_risks()
 
         elif choice == "3":
             search_risks()
 
         elif choice == "4":
-            add_risk()
+            view_risk_details()
 
         elif choice == "5":
-            edit_risk()
+            add_risk()
 
         elif choice == "6":
-            delete_risk()
+            edit_risk()
 
         elif choice == "7":
-            risk_dashboard()
+            delete_risk()
 
-        elif choice == "0":
+        elif choice == "8":
+            view_all_risks_with_controls()
+
+        elif choice == "9":
             break

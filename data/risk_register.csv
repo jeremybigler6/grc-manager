@@ -1,0 +1,21 @@
+Risk ID,Risk Name,Category,Likelihood,Impact,Risk Score,Risk Level,Owner,Treatment Plan,Status,Date Identified,Last Review,Target Date
+R-001,Excessive Privileged Access,Identity & Access Management,4,5,20,Critical,IT Security,Enforce least privilege principles and remove dormant admin accounts,Open,2026-07-03,2026-07-03,2026-08-15
+R-002,Weak MFA and Conditional Access Coverage,Identity & Access Management,4,4,16,High,IT Security,Expand MFA enforcement and strengthen conditional access policies,Open,2026-07-03,2026-07-03,2026-08-20
+R-003,Credential Theft Through Phishing,Email & User Awareness,4,4,16,High,Security Operations,Improve email filtering and targeted phishing awareness training,Open,2026-07-03,2026-07-03,2026-08-22
+R-004,Unpatched Internet Facing Systems,Vulnerability Management,4,5,20,Critical,Infrastructure Security,Accelerate patching and reduce exposure window for internet facing assets,Open,2026-07-03,2026-07-03,2026-08-10
+R-005,Ransomware and Malware Propagation,Endpoint Security,3,5,15,High,Security Engineering,Strengthen EDR coverage and restrict lateral movement,Open,2026-07-03,2026-07-03,2026-08-25
+R-006,Cloud Misconfiguration and Public Exposure,Cloud Security,3,4,12,Medium,Cloud Engineering,Implement baseline controls and review cloud configuration drift,Open,2026-07-03,2026-07-03,2026-09-01
+R-007,Insufficient Logging and Alerting Coverage,Security Operations,4,4,16,High,Security Operations,Expand telemetry and tune detections for critical assets,Open,2026-07-03,2026-07-03,2026-08-18
+R-008,Data Leakage Through Unmanaged Sharing,Data Protection,3,5,15,High,Data Governance,Apply data classification and enforce DLP controls,Open,2026-07-03,2026-07-03,2026-08-28
+R-009,Vulnerable Application Development Practices,Application Security,3,5,15,High,Application Security,Introduce secure SDLC controls and dependency scanning,Open,2026-07-03,2026-07-03,2026-09-05
+R-010,Incomplete Incident Response Readiness,Incident Response,3,4,12,Medium,Security Operations,Run simulations and refresh playbooks and evidence collection steps,Open,2026-07-03,2026-07-03,2026-09-08
+R-011,Third Party Security Compromise,Third Party Risk Management,3,4,12,Medium,Vendor Governance,Perform due diligence and monitor vendor security posture,Open,2026-07-03,2026-07-03,2026-09-10
+R-012,Backup Recovery Testing Gap,Business Continuity,3,4,12,Medium,IT Infrastructure,Increase restore testing and improve disaster recovery validation,Open,2026-07-03,2026-07-03,2026-09-12
+R-013,Insider Misuse of Sensitive Data,Insider Threat & Governance,3,5,15,High,Security Governance,Strengthen monitoring and review privileged and high risk access,Open,2026-07-03,2026-07-03,2026-09-15
+R-014,Remote Access and BYOD Security Gaps,Remote Access Security,3,4,12,Medium,IT Security,Standardize secure remote access and mobile device controls,Open,2026-07-03,2026-07-03,2026-09-18
+R-015,Lack of Asset Inventory and CMDB Accuracy,Asset Management,4,4,16,High,IT Operations,Improve discovery coverage and maintain current asset records,Open,2026-07-03,2026-07-03,2026-09-20
+R-016,Weak Network Segmentation and Lateral Movement,Network Security,3,4,12,Medium,Network Engineering,Reduce east west movement and enforce segmentation,Open,2026-07-03,2026-07-03,2026-09-22
+R-017,Inadequate Security Awareness and Training,Security Awareness,3,4,12,Medium,HR & Security,Deliver role based training and measure completion,Open,2026-07-03,2026-07-03,2026-09-25
+R-018,Inconsistent Change Management and Configuration Drift,Change Management,3,4,12,Medium,IT Operations,Strengthen change approvals and review configuration baselines,Open,2026-07-03,2026-07-03,2026-09-28
+R-019,GRC Evidence and Audit Readiness Gaps,Governance & Compliance,4,4,16,High,GRC,Centralize evidence and formalize control testing outputs,Open,2026-07-03,2026-07-03,2026-10-01
+R-020,Uncontrolled Third Party Data Sharing,Data Governance,3,4,12,Medium,Data Governance,Define sharing approvals and review vendor data handling obligations,Open,2026-07-03,2026-07-03,2026-10-03

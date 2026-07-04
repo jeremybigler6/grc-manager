@@ -1,0 +1,52 @@
+Control ID,Control Name,Control Type,Framework,Owner,Status,Description
+C-001,Privileged Access Management Policy,Preventive,NIST CSF,IT Security,Implemented,Defines approval requirements and restrictions for privileged accounts
+C-002,Privileged Account Review Workflow,Detective,ISO 27001,IT Security,Implemented,Requires periodic review and validation of privileged account access
+C-003,Privileged Access Monitoring Alerting,Detective,ISO 27001,IT Security,Implemented,Monitors privileged account activity and raises alerts for unusual behavior
+C-004,MFA Enforcement for Admin Accounts,Preventive,NIST CSF,IT Security,Implemented,Requires MFA for privileged and sensitive systems access
+C-005,Conditional Access Policy Baseline,Preventive,ISO 27001,IT Security,Implemented,Applies conditional access based on device posture and user context
+C-006,Access Recertification Process,Detective,CIS Controls,IT Security,Implemented,Reviews user access rights on a recurring schedule and removes stale access
+C-007,Secure Email Gateway Policy,Preventive,NIST CSF,Security Operations,Implemented,Filters phishing attempts and reduces malicious email delivery to users
+C-008,Phishing Simulation and Awareness Training,Preventive,NIST CSF,HR & Security,Implemented,Provides recurring training and simulations for phishing and social engineering
+C-009,Security Awareness Reporting Dashboard,Detective,NIST CSF,HR & Security,Implemented,Tracks training completion and phishing simulation outcomes
+C-010,Vulnerability Scanning Program,Detective,CIS Controls,Infrastructure Security,Implemented,Identifies known vulnerabilities across internet facing systems and internal hosts
+C-011,Patch Management SLA,Preventive,ISO 27001,Infrastructure Security,Implemented,Defines patching timelines and prioritization for critical vulnerabilities
+C-012,Asset Inventory and CMDB Maintenance,Preventive,CIS Controls,IT Operations,Implemented,Maintains current inventory and ownership data for critical assets
+C-013,Endpoint Detection and Response,Detective,NIST CSF,Security Engineering,Implemented,Provides continuous monitoring and response for suspicious endpoint activity
+C-014,Application Allowlisting,Preventive,CIS Controls,Security Engineering,Implemented,Restricts execution to approved applications and reduces malware impact
+C-015,Full Disk Encryption Standard,Preventive,ISO 27001,Endpoint Engineering,Implemented,Protects endpoint data at rest and reduces exposure from device loss
+C-016,Cloud IAM Least Privilege Baseline,Preventive,CIS Controls,Cloud Engineering,Implemented,Defines least privilege access requirements for cloud identities and roles
+C-017,Cloud Configuration Drift Review,Detective,CIS Controls,Cloud Engineering,Implemented,Reviews cloud settings and flags deviations from approved baselines
+C-018,Public Access Protection for Cloud Storage,Preventive,ISO 27001,Cloud Engineering,Implemented,Prevents public exposure of cloud storage objects and shares
+C-019,Security Information and Event Management,Detective,NIST CSF,Security Operations,Implemented,Aggregates logs and correlates events for threat detection and investigation
+C-020,Alert Tuning and Monitoring Playbooks,Preventive,NIST CSF,Security Operations,Implemented,Defines monitoring thresholds and escalation criteria for critical alerts
+C-021,Data Loss Prevention Policy,Preventive,ISO 27001,Data Governance,Implemented,Prevents unauthorized transfer of sensitive data outside approved channels
+C-022,Data Classification and Retention Standard,Preventive,ISO 27001,Data Governance,Implemented,Defines sensitivity levels handling requirements and retention periods
+C-023,Secure Software Development Lifecycle,Preventive,OWASP,Application Security,Implemented,Requires security review during design development and release activities
+C-024,Dependency and Code Scanning Program,Detective,OWASP,Application Security,Implemented,Identifies insecure libraries and code issues before production release
+C-025,Secrets Management Standard,Preventive,ISO 27001,Application Security,Implemented,Protects credentials and secrets from exposure in code and automation
+C-026,Incident Response Playbook and Review,Corrective,NIST CSF,Security Operations,Implemented,Standardizes incident handling steps and documents lessons learned after response activities
+C-027,Tabletop Exercise Schedule,Preventive,NIST CSF,Security Operations,Implemented,Requires periodic simulation exercises to validate response readiness
+C-028,Forensic Evidence Collection Checklist,Detective,NIST CSF,Security Operations,Implemented,Ensures evidence timeline and impact details are captured during incidents
+C-029,Backup Policy and Retention Standard,Preventive,ISO 27001,IT Infrastructure,Implemented,Defines backup scope retention periods and recovery objectives
+C-030,Restore Testing Program,Detective,ISO 27001,IT Infrastructure,Implemented,Validates backup integrity and confirms restoration can be completed successfully
+C-031,Disaster Recovery Plan Review,Preventive,ISO 27001,IT Infrastructure,Implemented,Maintains recovery procedures and escalation paths for critical systems
+C-032,Insider Threat Monitoring Rule Set,Detective,ISO 27001,Security Governance,Implemented,Flags unusual data access or exfiltration behavior by privileged users
+C-033,Data Access Review for High Risk Users,Detective,ISO 27001,Security Governance,Implemented,Reviews data access for sensitive systems and high risk users on a schedule
+C-034,Remote Access VPN with MFA,Preventive,NIST CSF,IT Security,Implemented,Requires MFA and approved methods for remote access to corporate resources
+C-035,Mobile Device Management Baseline,Preventive,NIST CSF,IT Security,Implemented,Defines minimum security settings for managed mobile devices
+C-036,BYOD Acceptable Use Policy,Preventive,NIST CSF,IT Security,Implemented,Sets requirements for personal devices accessing corporate resources
+C-037,Discovery and Asset Tracking Tooling,Detective,CIS Controls,IT Operations,Implemented,Provides current inventory visibility for devices and systems across the environment
+C-038,Configuration Baseline Review Process,Preventive,CIS Controls,IT Operations,Implemented,Validates systems against approved secure configuration baselines
+C-039,Network Segmentation Standard,Preventive,CIS Controls,Network Engineering,Implemented,Limits lateral movement by separating critical systems and user networks
+C-040,Firewall and ACL Review Workflow,Detective,CIS Controls,Network Engineering,Implemented,Reviews network controls and removes unnecessary access paths
+C-041,Security Awareness Training Program,Preventive,NIST CSF,HR & Security,Implemented,Provides recurring education on phishing safe handling and reporting expectations
+C-042,Security Awareness Metric Reporting,Detective,NIST CSF,HR & Security,Implemented,Tracks completion rates and highlights training gaps by business unit
+C-043,Change Approval Board Process,Preventive,ISO 27001,IT Operations,Implemented,Requires review and approval for changes affecting critical systems
+C-044,Secure Configuration Baseline Standard,Preventive,CIS Controls,IT Operations,Implemented,Defines approved settings for servers workstations and network devices
+C-045,Control Evidence Repository,Preventive,ISO 27001,GRC,Implemented,Stores evidence artifacts for control operation and internal review
+C-046,Control Testing and Assurance Calendar,Detective,ISO 27001,GRC,Implemented,Schedules periodic testing of control design and operating effectiveness
+C-047,Policy Attestation and Review Process,Preventive,ISO 27001,GRC,Implemented,Requires periodic review and signoff of security policies and standards
+C-048,Third Party Due Diligence Questionnaire,Preventive,NIST CSF,Vendor Governance,Implemented,Collects third party security information before onboarding and renewal
+C-049,Vendor Security Review Checklist,Detective,NIST CSF,Vendor Governance,Implemented,Reviews vendor security posture and contract obligations on an ongoing basis
+C-050,Data Sharing Approval Workflow,Preventive,ISO 27001,Data Governance,Implemented,Requires documented approval and logging for sensitive data transfers
+C-051,Corrective Security and Compliance Control,Corrective,NIST CSF,IT Security,Proposed,"Designed for Weak MFA and Conditional Access Coverage and aligned to the Identity & Access Management risk area. This control supports monitoring, evidence collection, and periodic review. It is intended to respond after an issue occurs and restore control."
