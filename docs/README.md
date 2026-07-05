@@ -1,233 +1,88 @@
-# AI-Powered GRC Manager
+# AI-Powered Enterprise GRC Manager
 
-A Python-based Governance, Risk, and Compliance (GRC) platform that simulates many of the core capabilities found in commercial GRC solutions. This project was built to strengthen both my Python programming skills and my understanding of enterprise risk management, cybersecurity governance, compliance, and AI-assisted workflows.
+A high-performance, local-first Governance, Risk, and Compliance (GRC) platform engineered in Python. This platform synthesizes traditional corporate risk management infrastructure with deterministic LLM pipelines to automate regulatory framework mapping, policy generation, and audit readiness reviews. 
 
-The application combines traditional risk management functionality with OpenAI-powered tools that assist with risk analysis, framework guidance, policy generation, evidence review, and reporting.
-
----
-
-# Features
-
-## Risk Management
-
-- Create, view, edit, and delete risks
-- Search for risks
-- View detailed Risk Profiles
-- Track likelihood, impact, risk score, and risk level
-- Assign risk owners
-- Document treatment plans
-- Track risk status and target completion dates
-
-## Control Management
-
-- Create, view, edit, and delete controls
-- Search for controls
-- Link multiple controls to a single risk
-- View all controls associated with a risk
-- Many-to-many risk/control relationships
-
-## AI Workspace (OpenAI Powered)
-
-### AI Risk Advisor
-
-- Analyze operational and cybersecurity risks
-- Recommend preventive, detective, and corrective controls
-- Identify business impacts
-- Suggest treatment strategies
-- Recommend audit evidence
-
-### Framework Assistant
-
-- Explain cybersecurity and compliance frameworks
-- Assist with:
-  - NIST CSF
-  - ISO 27001
-  - SOC 2
-  - PCI DSS
-  - NPDES
-  - SCAQMD
-  - Custom frameworks
-
-### Control Builder
-
-- Generate controls for existing risks
-- Recommend control type
-- Save generated controls directly into the control library
-- Automatically map controls to risks
-
-### Policy Generator
-
-- Generate policies and procedures from identified risks
-- Support both industrial operations and cybersecurity scenarios
-
-### Evidence Review
-
-- Review submitted audit evidence
-- Identify evidence gaps
-- Recommend additional supporting documentation
-
-### Report Writer
-
-- Generate executive risk summaries
-- Summarize risk posture
-- Highlight high-risk items
-- Produce management-ready reports
+Built to handle both complex cybersecurity frameworks and rigorous physical industrial regulations, this application bridges the gap between digital asset protection and operational risk.
 
 ---
 
-# Reporting & Analysis
+## Core Architecture & Technical Capabilities
 
-- Risk Dashboard
-- Risk Statistics
-- Open vs Closed Risks
-- Risk Level Distribution
-- Average Risk Score
-- Highest Risk Score
-- Upcoming Risks
-- Overdue Risks
-- Risk Heat Map
+### Relational Database & Data Modeling (SQLite)
+*   **Normalized Database Schema:** Utilizing SQLite to manage complex relational structures rather than flat files, ensuring strict data integrity.
+*   **Many-to-Many Framework Mapping:** Implements robust junction tables (`risk_control_mapping`) to execute "assess once, comply many" logic. A single security control can be mapped simultaneously across disparate frameworks (e.g., NIST CSF, ISO 27001, and SOC 2).
+*   **Immutable Audit Logging:** Features an append-only transaction ledger that captures every major database event, risk-score modification, and user action to provide an examiner-ready trail of platform activity.
 
----
-
-# Technologies Used
-
-- Python 3
-- OpenAI API
-- CSV Data Storage
-- Modular Python Architecture
-- Git
-- GitHub
+### Context-Grounded AI Workspace (OpenAI API)
+*   **Deterministic Risk Advising:** Ingests qualitative asset threats to evaluate business impacts, analyze likelihood/impact matrices, and prescribe mitigation strategies.
+*   **Cross-Framework Gap Analysis:** Leverages system-prompted LLM pipelines to review existing company documentation against targeted regulatory requirements, isolating control deficiencies.
+*   **Automated Evidence Review:** Simulates an internal auditor by evaluating submitted technical evidence against framework criteria, flagging insufficient artifacts, and suggesting explicit remediation documentation.
+*   **Policy & Report Engineering:** Generates production-ready security policies, control objectives, and data-driven executive risk posture summaries based directly on live database records.
 
 ---
 
-# Project Structure
+## Platform Features
 
-```
-main.py
-risk_register.py
-controls.py
-ai_tools.py
-openai_helper.py
-database.py
-risk_register.csv
-controls_library.csv
-risk_control_mapping.csv
-generated_policies/
-generated_reports/
-README.md
-```
+### 1. Risk Register & Lifecycle Management
+- Full CRUD operations supporting comprehensive Risk Profiles.
+- Dynamic scoring tracking Inherent vs. Residual Risk metrics (Likelihood $\times$ Impact).
+- Granular tracking for ownership assignment, risk treatment strategies (Accept, Mitigate, Transfer, Avoid), and target remediation timelines.
 
----
+### 2. Control Library & Mapping Engine
+- Centralized controls repository categorized by type (Administrative, Technical, Physical) and function (Preventive, Detective, Corrective).
+- Direct linking mechanisms associating multiple controls to individual or grouped risks.
+- Searchable indexing for rapid control retrieval during audit simulations.
 
-# Skills Demonstrated
-
-## Python
-
-- Modular application architecture
-- CRUD operations
-- File management
-- Error handling
-- Input validation
-- Data modeling
-- Menu-driven CLI development
-
-## Governance, Risk & Compliance
-
-- Enterprise Risk Management
-- Risk Register Development
-- Control Library Management
-- Risk-to-Control Mapping
-- Risk Assessment Methodology
-- Risk Treatment Planning
-- Control Evaluation
-- Audit Evidence Management
-- Executive Reporting
-
-## Cybersecurity
-
-- Identity & Access Management
-- Vulnerability Management
-- Incident Response
-- Security Awareness
-- Third-Party Risk
-- Data Protection
-- Cloud Security
-- Security Framework Mapping
-
-## Artificial Intelligence
-
-- OpenAI API Integration
-- AI-assisted Risk Analysis
-- AI-generated Policies
-- AI-generated Controls
-- AI-assisted Evidence Review
-- AI-generated Executive Reports
+### 3. Integrated Reporting Analytics
+- Real-time dashboard generation tracking critical metrics:
+  - Open vs. Closed Risk ratios.
+  - Risk Level distribution frequencies.
+  - Mean and Peak Enterprise Risk Scores.
+  - Trackers for upcoming and overdue remediation tasks.
+  - Dynamic risk matrix mapping.
 
 ---
 
-# Sample Risk Domains
+## Dual-Domain Capabilities & Sample Data
 
-The application includes realistic sample data from two industries.
+The platform natively handles data across two fundamentally different but increasingly converging risk profiles, showcasing true enterprise flexibility:
 
-### Industrial Operations
+### Cybersecurity & IT GRC
+- Identity & Access Management (IAM)
+- Zero Trust & Cloud Infrastructure Security
+- Vendor/Third-Party Risk Management (TPRM)
+- Vulnerability Management & Incident Response
+- Data Protection, Privacy, and Business Continuity
 
-- Gas Turbine Reliability
-- Boiler Systems
-- Steam Systems
-- SCADA
-- Environmental Compliance
-- NPDES
-- CEMS
-- Process Safety
-- Electrical Reliability
-- Confined Space Safety
-
-### Cybersecurity / GRC
-
-- Identity & Access Management
-- Vendor Risk
-- Cloud Security
-- Vulnerability Management
-- Data Protection
-- Phishing
-- Incident Response
-- Backup Recovery
-- Security Awareness
-- Compliance
+### Industrial Operations & Critical Infrastructure
+- SCADA & Industrial Control Systems (ICS) Security
+- Gas Turbine, Boiler, and Steam System Operational Reliability
+- Process Safety Management (PSM) & Electrical Reliability
+- Environmental Regulatory Compliance (EPA NPDES, SCAQMD, CEMS)
+- Confined Space & Physical Plant Safety
 
 ---
 
-# Future Roadmap
+## Technology Stack
 
-## Phase 3 — Agentic AI Workflows
-
-- Autonomous Risk Assessments
-- Automated Control Recommendations
-- Framework Mapping
-- Compliance Gap Analysis
-- Continuous Risk Monitoring
-- AI-assisted Audit Preparation
-- Multi-step AI Workflows
-
-## Future Enhancements
-
-- SQLite Database
-- User Authentication
-- PDF Report Generation
-- Audit Logging
-- Web Interface
-- Dashboard UI
-- Evidence Uploads
-- Workflow Automation
+- **Core Language:** Python 3.11+
+- **Database Engine:** SQLite (Relational Storage & Schema Optimization)
+- **AI Integration:** OpenAI API (Advanced Prompt Engineering & Structured JSON Outputs)
+- **Version Control:** Git & GitHub
 
 ---
 
-# About This Project
+## Project Structure
 
-This project was developed as part of my transition into Governance, Risk, and Compliance (GRC).
-
-My goal is to build a portfolio-quality application that demonstrates practical software development skills while solving realistic GRC problems faced by organizations.
-
-Rather than simply learning Python or studying GRC frameworks independently, I chose to build an application that integrates enterprise risk management concepts, cybersecurity controls, OpenAI-powered analysis, and modern software design principles into a single platform.
-
-The long-term vision is to evolve this project from a command-line application into a full AI-assisted GRC platform with agentic workflows, automated compliance analysis, and enterprise reporting capabilities.
+```text
+├── main.py                     # Application entry point & runtime loop
+├── database.py                 # SQLite connection layer, schema definition, & migrations
+├── risk_register.py            # Risk data models, CRUD logic, and mathematical scoring
+├── controls.py                 # Control library indexing & structural definitions
+├── ai_tools.py                 # LLM pipeline orchestration & prompt engineering
+├── openai_helper.py            # API client initialization, payload validation, & error handling
+├── grc_enterprise.db          # Live SQLite relational database 
+├── audit_logger.py             # Append-only transaction log handler
+├── generated_policies/         # Output directory for AI-engineered documentation
+├── generated_reports/          # Output directory for management-ready compliance reports
+└── README.md                   # System documentation

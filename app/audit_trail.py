@@ -1,6 +1,5 @@
 import sqlite3
 from datetime import datetime
-
 from database import DB_NAME, connect_db
 
 
@@ -76,3 +75,27 @@ def view_audit_trail(limit=20):
 
     for action, details, created_at in entries:
         print(f"{created_at} | {action} | {details}")
+
+
+def reports_and_audit_menu():
+    while True:
+        print("\n========== Reports & Audit Trail ==========")
+        print("1. Risk-Control Coverage Report")
+        print("2. Audit Trail Overview")
+        print("3. Clear Audit Log")
+        print("4. Return to Main Menu")
+
+        choice = input("\nSelect an option: ").strip()
+
+        if choice == "1":
+            from controls import view_all_risks_with_controls
+            view_all_risks_with_controls()
+        elif choice == "2":
+            log_activity("Audit Trail Viewed", "User opened the audit trail overview")
+            view_audit_trail()
+        elif choice == "3":
+            clear_audit_log()
+        elif choice == "4":
+            break
+        else:
+            print("\nInvalid choice.")

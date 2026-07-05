@@ -4,6 +4,9 @@ from risk_register import risk_register_menu
 from controls import controls_menu, view_all_risks_with_controls
 from import_data import import_all_data
 from ai_tools import ai_tools_menu
+from framework_ai_lookup import explain_framework_control
+from grc_agent import run_grc_agent
+
 
 def framework_lookup_menu():
     print("\n========== AI Framework Lookup ==========")
@@ -15,28 +18,6 @@ def framework_lookup_menu():
 
     print("\n========== Framework Control Explanation ==========")
     print(result)
-
-def reports_and_audit_menu():
-    while True:
-        print("\n========== Reports & Audit Trail ==========")
-        print("1. Risk-Control Coverage Report")
-        print("2. Audit Trail Overview")
-        print("3. Clear Audit Log")
-        print("4. Return to Main Menu")
-
-        choice = input("\nSelect an option: ").strip()
-
-        if choice == "1":
-            view_all_risks_with_controls()
-        elif choice == "2":
-            log_activity("Audit Trail Viewed", "User opened the audit trail overview")
-            view_audit_trail()
-        elif choice == "3":
-            clear_audit_log()
-        elif choice == "4":
-            break
-        else:
-            print("\nInvalid choice.")
 
 
 def main():
@@ -51,9 +32,10 @@ def main():
         print("1. Risk Management")
         print("2. Control Management")
         print("3. Risk Treatment Generator")
-        print("4. Reports & Audit Trail")
-        print("5. Import Data from CSV")
-        print("6. Exit")
+        print("4. Autonomous GRC Agent (Agentic AI)")
+        print("5. Reports & Audit Trail")
+        print("6. Import Data from CSV")
+        print("7. Exit")
 
         choice = input("\nSelect an option: ").strip()
 
@@ -67,12 +49,28 @@ def main():
             ai_tools_menu()
 
         elif choice == "4":
-            reports_and_audit_menu()
+                    print("\n========== Autonomous GRC Agent ==========")
+                    print("Give the agent a complex objective (e.g., 'Audit Risk R-001 and remediate gaps')")
+                    objective = input("\nEnter Agent Objective: ").strip()
+                    
+                    if objective:
+                        from grc_agent import run_grc_agent  
+                        
+                        # Capture the agent's final report and print it to the console
+                        final_report = run_grc_agent(objective)
+                        print("\n=== FINAL AI COMPLIANCE REPORT ===")
+                        print(final_report)
+                        print("===================================\n")
+                    else:
+                        print("Objective cannot be blank.")
 
         elif choice == "5":
-            import_all_data()
+            reports_and_audit_menu()
 
         elif choice == "6":
+            import_all_data()
+
+        elif choice == "7":
             print("\nThank you for using GRC Manager.")
             break
 

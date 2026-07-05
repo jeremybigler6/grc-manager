@@ -35,3 +35,4 @@ def ask_openai(system_prompt, user_prompt, model=None):
         print("DEBUG: OpenAI API error:")
         print(e)
         return None
+        
