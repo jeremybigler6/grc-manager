@@ -64,17 +64,38 @@ def clear_audit_log():
     print("\nAudit log cleared.")
 
 
-def view_audit_trail(limit=20):
-    entries = get_audit_log(limit)
+def view_audit_trail(limit=50):
+    while True:
+        entries = get_audit_log(limit)
 
-    print("\n========== Audit Trail ==========")
+        print(f"\n========== Audit Trail (Showing Last {limit} Events) ==========")
 
-    if not entries:
-        print("No audit activity recorded yet.")
-        return
+        if not entries:
+            print("No audit activity recorded yet.")
+        else:
+            for action, details, created_at in entries:
+                print(f"{created_at} | {action} | {details}")
 
-    for action, details, created_at in entries:
-        print(f"{created_at} | {action} | {details}")
+        print("\n---------------------------------")
+        print("1. Clear Audit Log Table")
+        print("B. Return to Menu")
+        print("---------------------------------")
+        
+        choice = input("Select an option: ").strip().upper()  # Forces uppercase to handle 'b' or 'B'
+
+        if choice == "1":
+            confirm = input("\nAre you sure you want to delete the log? (y/n): ").strip().lower()
+            if confirm in ['y', 'yes']:
+                clear_audit_log_database_table() 
+                print("[Database] Audit log cleared successfully.")
+            else:
+                print("Operation cancelled. Log was not deleted.")
+                
+        elif choice == "B":
+            print("Returning...")
+            break
+        else:
+            print("Invalid choice. Please select 1 or B.")
 
 
 def reports_and_audit_menu():

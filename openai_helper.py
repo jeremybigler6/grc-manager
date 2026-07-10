@@ -5,7 +5,7 @@ try:
 except ImportError:  # pragma: no cover - depends on environment
     OpenAI = None
 
-
+#can come back and change AI model if needed, but gpt-4.1-mini is a good default for most GRC tasks
 DEFAULT_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
 
 

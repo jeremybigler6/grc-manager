@@ -445,10 +445,10 @@ def controls_menu():
         print("4. Link Control to Risk")
         print("5. View Controls for a Risk")
         print("6. Risk-Control Coverage Report")
-        print("7. Return to Main Menu")
+        print("B. Return to Main Menu")
         print("======================================")
 
-        choice = input("\nSelect an option: ").strip()
+        choice = input("\nSelect an option: ").strip().upper()
 
         if choice == "1":
             add_control()
@@ -464,7 +464,7 @@ def controls_menu():
             view_controls_for_risk()
         elif choice == "6":
             view_all_risks_with_controls()
-        elif choice == "7":
+        elif choice == "B":
             break
         else:
             print("Invalid choice. Try again.")

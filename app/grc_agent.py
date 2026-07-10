@@ -1,38 +1,202 @@
-# Orchestrator: GRC Agent
+import json      # Standard data interchange format for API payloads and string mapping
+from openai import OpenAI   # Main OpenAI API client vehicle for managing chat completion loops
+from app.framework_crosswalk import run_crosswalk_engine_ui, review_suggestions_queue_ui
 
-import json
-from openai import OpenAI
+# ------------------------------------------------------------------------------
+# SECTION 1: THE CORE AGENT TOOLS (Standard Python Functions)
+# ------------------------------------------------------------------------------
 
-# Pull in the 3 secure database tools we broke down earlier
-from agent_tools import (
-    tool_get_risk_details, 
-    tool_get_linked_controls, 
-    tool_create_and_link_control
-)
+def tool_search_risk_register(keyword):
+    """
+    PURPOSE: Ingests a search term or concept, queries the database 
+             using a case-insensitive SQL LIKE constraint on the correct schema,
+             and returns all matching Risk IDs and names.
+    """
+    from database import connect_db
+    
+    conn = connect_db()
+    cursor = conn.cursor()
+    
+    search_term = f"%{keyword.lower()}%"
+    
+    cursor.execute("""
+        SELECT risk_id, risk_name, treatment_plan 
+        FROM risks 
+        WHERE LOWER(risk_name) LIKE ? OR LOWER(treatment_plan) LIKE ?
+    """, (search_term, search_term))
+    
+    rows = cursor.fetchall()
+    conn.close()
+    
+    if not rows:
+        return json.dumps({"message": f"Discovery Notice: No risks found in the registry matching keyword '{keyword}'."})
+        
+    results = []
+    for r in rows:
+        results.append({
+            "risk_id": r[0],
+            "name": r[1],
+            "description": r[2]
+        })
+        
+    return json.dumps(results)
+
+
+def tool_get_risk_details(risk_id):
+    """
+    PURPOSE: Ingests a target Risk ID, queries the database, and converts 
+             the matching SQLite row attributes into a structured JSON string.
+    """
+    from database import connect_db
+    
+    conn = connect_db()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM risks WHERE UPPER(risk_id) = ?", (risk_id.upper(),))
+    row = cursor.fetchone()
+    conn.close()
+    
+    if not row:
+        return f"Error: Target Risk ID '{risk_id}' was not found within the database register."
+    
+    fields = [
+        "risk_id", "risk_name", "category", "likelihood", "impact", "risk_score", 
+        "risk_level", "owner", "treatment_plan", "status", "date_created", 
+        "last_review_date", "target_date"
+    ]
+    
+    return json.dumps(dict(zip(fields, row)))
+
+
+def tool_get_linked_controls(risk_id):
+    """
+    PURPOSE: Conducts a relational database JOIN check across your junction mapping 
+             table to verify what compliance safeguards are actively applied to a risk.
+    """
+    from database import connect_db
+    
+    conn = connect_db()
+    cursor = conn.cursor()
+    
+    # DYNAMIC COLUMN PROTECTION: Check the actual column layout to choose between 'control_name' and 'name'
+    cursor.execute("PRAGMA table_info(controls)")
+    columns = [info[1] for info in cursor.fetchall()]
+    name_col = "control_name" if "control_name" in columns else "name"
+    
+    query = f"""
+        SELECT c.control_id, c.{name_col}, c.control_type, c.framework, c.description
+        FROM controls c
+        JOIN risk_control_mapping m ON c.control_id = m.control_id
+        WHERE UPPER(m.risk_id) = ?
+    """
+    
+    cursor.execute(query, (risk_id.upper(),))
+    rows = cursor.fetchall()
+    conn.close()
+    
+    if not rows:
+        return f"Audit Advisory: There are currently zero mitigating controls mapped to Risk ID {risk_id}."
+    
+    controls_list = []
+    for r in rows:
+        controls_list.append({
+            "id": r[0],
+            "name": r[1],
+            "type": r[2],
+            "framework": r[3],
+            "description": r[4]
+        })
+        
+    return json.dumps(controls_list)
+
+
+def tool_create_and_link_control(risk_id, control_id, name, control_type, framework, owner, description):
+    """
+    PURPOSE: Autonomously engineers a mitigation safeguard, saves it to the library, 
+             and hooks it to the broken risk target using the join table layout.
+    """
+    from database import connect_db
+    from audit_trail import log_activity
+    
+    conn = connect_db()
+    cursor = conn.cursor()
+    
+    # DYNAMIC COLUMN PROTECTION
+    cursor.execute("PRAGMA table_info(controls)")
+    columns = [info[1] for info in cursor.fetchall()]
+    name_col = "control_name" if "control_name" in columns else "name"
+    
+    try:
+        query_a = f"""
+            INSERT OR REPLACE INTO controls (control_id, {name_col}, control_type, framework, owner, description)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """
+        cursor.execute(query_a, (control_id, name, control_type, framework, owner, description))
+        
+        cursor.execute("""
+            INSERT OR REPLACE INTO risk_control_mapping (risk_id, control_id)
+            VALUES (?, ?)
+        """, (risk_id.upper(), control_id.upper()))
+        
+        conn.commit()
+        log_activity("Agent Remediated Control Gap", f"Autonomously generated and linked control {control_id} to Risk {risk_id}")
+        
+        return f"Success: Safeguard {control_id} has been saved and permanently linked to Risk {risk_id}."
+
+    except Exception as e:
+        conn.rollback()
+        return f"Database Error: Failed to create or link control. Reason: {str(e)}"
+    finally:
+        conn.close()
+
+
+# ------------------------------------------------------------------------------
+# SECTION 2: THE REASONING & ORCHESTRATION CYCLE
+# ------------------------------------------------------------------------------
 
 def run_grc_agent(user_input):
     """
-    The Central Orchestrator: Manages the 5-loop execution cycle, 
-    talk to the OpenAI API, and runs local tools based on AI decisions.
+    Coordinates state memory tracking loops with OpenAI's completions API 
+    and handles deterministic routing to your local python script endpoints.
     """
-    # Initialize the secure connection to OpenAI's server infrastructure
     client = OpenAI()
     
-    # Initialize the short-term memory 'notebook' tracking array
     messages = [
         {
             "role": "system", 
             "content": (
                 "You are an autonomous GRC Compliance Officer. Your goal is to audit risks, "
                 "identify security control gaps, and remediate them using your tools. "
-                "Always verify existing controls before creating new ones."
+                "CRITICAL DIRECTION: If a user specifies a risk by its general name or concept "
+                "(e.g., 'firewall', 'passwords', 'backup') instead of providing an explicit Risk ID, "
+                "you MUST run 'tool_search_risk_register' first to discover the correct identifier.\n"
+                "Always verify existing controls via 'tool_get_linked_controls' before building new ones."
             )
         },
-        {"role": "user", "content": user_input}  # Step 1: Ingest the user's prompt
+        {
+            "role": "user", 
+            "content": user_input
+        } 
     ]
     
-    # Define the tool blueprint dictionary so OpenAI knows what tools exist
     agent_tools_framework = [
+        {
+            "type": "function",
+            "function": {
+                "name": "tool_search_risk_register",
+                "description": "Searches the database registry using key-word matching constraints to discover associated Risk IDs.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "keyword": {
+                            "type": "string", 
+                            "description": "The target operational concept or search term extracted from the command string (e.g., 'firewall')."
+                        }
+                    },
+                    "required": ["keyword"]
+                }
+            }
+        },
         {
             "type": "function",
             "function": {
@@ -41,7 +205,10 @@ def run_grc_agent(user_input):
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "risk_id": {"type": "string", "description": "The unique identifier for the risk (e.g., 'R-001')"}
+                        "risk_id": {
+                            "type": "string", 
+                            "description": "The unique identifier for the risk (e.g., 'R-001')"
+                        }
                     },
                     "required": ["risk_id"]
                 }
@@ -55,7 +222,10 @@ def run_grc_agent(user_input):
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "risk_id": {"type": "string", "description": "The target risk ID to inspect."}
+                        "risk_id": {
+                            "type": "string", 
+                            "description": "The target risk ID to inspect."
+                        }
                     },
                     "required": ["risk_id"]
                 }
@@ -83,78 +253,97 @@ def run_grc_agent(user_input):
         }
     ]
 
-    # STEP 2: The Reasoning Cycle (Max 5 Loops Safety Guardrail)
     for loop_count in range(5):
-        print(f"\n[LOOP {loop_count + 1}/5] Reaching out to OpenAI brain...")
+        print(f"\n[LOOP {loop_count + 1}/5] Dispatched state context stream to OpenAI...")
         
-        # STEP 3: THE HANDSHAKE LINE - Sending the notebook data over the internet
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages,
             tools=agent_tools_framework,
-            tool_choice="auto"  # Let the AI choose whether to call a tool or finish
+            tool_choice="auto"  
         )
         
-        # Intercept the response envelope
         ai_message = response.choices[0].message
-        
-        # Append the AI's thoughts back into our local notebook array
         messages.append(ai_message)
         
-        # EVALUATION POINT: Does it need to call a tool?
-        if not ai_message.tool_calls:
-            # NO path taken (Task Complete): Exit the loop and return the final report
-            print("[EXIT] Task complete. Terminating loop.")
+        if ai_message.tool_calls:
+            for tool_call in ai_message.tool_calls:
+                tool_name = tool_call.function.name
+                tool_args = json.loads(tool_call.function.arguments)
+                
+                print(f"[EXECUTION TRIGGERED] AI requested local invocation: {tool_name} with args: {tool_args}")
+                
+                if tool_name == "tool_search_risk_register":
+                    tool_output = tool_search_risk_register(**tool_args)
+                elif tool_name == "tool_get_risk_details":
+                    tool_output = tool_get_risk_details(**tool_args)
+                elif tool_name == "tool_get_linked_controls":
+                    tool_output = tool_get_linked_controls(**tool_args)
+                elif tool_name == "tool_create_and_link_control":
+                    tool_output = tool_create_and_link_control(**tool_args)
+                else:
+                    tool_output = {"error": f"Requested execution endpoint '{tool_name}' isn't structural."}
+                
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "name": tool_name,
+                    "content": json.dumps(tool_output) if not isinstance(tool_output, str) else tool_output
+                })
+        else:
+            print("\n[GOAL REACHED] Finalized audit report compiled successfully.")
             return ai_message.content
-            
-        # YES path taken: Route to STEP 4 & 5 (System Execution)
-        print(f"-> AI requested {len(ai_message.tool_calls)} tool execution(s).")
+
+    return "SYSTEM BREAKDOWN ERROR: Agent execution depth broken. Max reasoning loops exceeded."
+
+
+def ai_services_menu():
+    """
+    Centralized sub-menu for background automation, analytics, and execution loops.
+    Houses the Autonomous GRC Agent loop, crosswalk processors, and staging queues.
+    """
+    while True:
+        print("\n==================================================")
+        print("           AGENTIC & AUTOMATED ENGINES            ")
+        print("==================================================")
+        print("1. Launch Autonomous GRC Agent Loop")
+        print("2. Run Crosswalk Suggestion Engine (NIST ↔ ISO ↔ SOC 2)")
+        print("3. Review Pending AI Mapping Suggestions Queue")
+        print("B. Back to AI Operations Center")
+        print("==================================================")
         
-        for tool_call in ai_message.tool_calls:
-            function_name = tool_call.function.name
-            function_args = json.loads(tool_call.function.arguments)
-
-            print(f"   Executing local Python tool: {function_name}() with arguments: {function_args}")
+        sub_choice = input("Select an engine service: ").strip().upper()
+        
+        if sub_choice == "1":
+            # Option 1: Main Autonomous GRC Agent workflow loop
+            print("\n========== Autonomous GRC Agent ==========")
+            print("Give the agent a complex objective (e.g., 'Audit Risk R-001 and remediate gaps')")
+            print("(Type 'q' or 'quit' to go back)")
+            objective = input("\nEnter Agent Objective: ").strip()
+            
+            if objective.lower() in ['q', 'quit']:
+                print("\nExiting agent session...")
+                continue  # Returns cleanly back to the Agentic & Automated Engines menu
                 
-            # === THE ROUTER: Physically running your local code based on OpenAI's instruction ===
-            if function_name == "tool_get_risk_details":
-                tool_output = tool_get_risk_details(risk_id=function_args.get("risk_id"))
-            elif function_name == "tool_get_linked_controls":
-                tool_output = tool_get_linked_controls(risk_id=function_args.get("risk_id"))
-            elif function_name == "tool_create_and_link_control":
-                tool_output = tool_create_and_link_control(
-                    risk_id=function_args.get("risk_id"),
-                    control_id=function_args.get("control_id"),
-                    name=function_args.get("name"),
-                    control_type=function_args.get("control_type"),
-                    framework=function_args.get("framework"),
-                    owner=function_args.get("owner"),
-                    description=function_args.get("description")
-                )
+            if objective:
+                # Capture the agent's final report and print it to the console cleanly
+                final_report = run_grc_agent(objective)
+                print("\n=== FINAL AI COMPLIANCE REPORT ===")
+                print(final_report)
+                print("===================================\n")
             else:
-                tool_output = f"Error: Tool '{function_name}' is not integrated into this system."
+                print("Objective cannot be blank.")
                 
-            # === THE MEMORY BANK: Appending the raw tool database results back to the notebook ===
-            messages.append({
-                "tool_call_id": tool_call.id,
-                "role": "tool",
-                "name": function_name,
-                "content": tool_output
-            })
-            print(f"   Stored tool results inside short-term memory array.")
-
-    # Safety trap if it exhausts all 5 loops without cleanly exiting
-    return "Error: Agent timed out. Maximum logic execution guardrail threshold exceeded."
-
-
-# === THE ENTRY POINT: Allows execution directly from the command line ===
-if __name__ == "__main__":
-    print("--- GRC Risk Management Agent Active ---")
-    prompt = input("Enter your compliance instruction (e.g., 'Check risk details for R-001'): ")
-    
-    if prompt.strip():
-        final_report = run_grc_agent(prompt)
-        print("\n=== FINAL AGENT REPORT ===")
-        print(final_report)
-    else:
-        print("No instruction provided. Exiting.")
+        elif sub_choice == "2":
+            # Option 2: Triggers crosswalk processing logic
+            run_crosswalk_engine_ui()
+            
+        elif sub_choice == "3":
+            # Option 3: Opens human-in-the-loop validation queue interface
+            review_suggestions_queue_ui()
+            
+        elif sub_choice == "B":
+            print("Returning to AI Operations Center.")
+            break
+        else:
+            print("Invalid selection. Please choose 1, 2, 3, or B.")

@@ -629,10 +629,10 @@ def risk_register_menu():
         print("6. Edit Risk")
         print("7. Delete Risk")
         print("8. Risk-Control Coverage Report")
-        print("9. Return to Main Menu")
+        print("B. Return to Main Menu")
         print("====================================")
 
-        choice = input("\nSelect an option: ").strip()
+        choice = input("\nSelect an option: ").strip().upper()
 
         if choice == "1":
             risk_dashboard()
@@ -658,5 +658,5 @@ def risk_register_menu():
         elif choice == "8":
             view_all_risks_with_controls()
 
-        elif choice == "9":
+        elif choice == "B":
             break
